@@ -1,5 +1,5 @@
 #!/bin/sh
 echo "formatting new changes"
-npx lint-staged --config ./.lintstagedrc-prettier.json
+pnpm format
 echo "linting new changes"
-npx lint-staged --config ./.lintstagedrc-lint.json
+pnpm lint
