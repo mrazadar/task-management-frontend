@@ -1,103 +1,72 @@
-import Image from 'next/image'
+import { Metadata } from 'next'
+import { Task } from '@/types/task'
+import { Button } from '@/components/ui/button'
+import { Suspense } from 'react'
 
-export default function Home() {
+import { TaskCard } from '@/components/TaskCard'
+import { RefreshButton } from '@/components/RefreshButton'
+
+async function fetchTasks(): Promise<Task[]> {
+  const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/tasks`
+  console.log('Fetching tasks from', url) // Debugging i)
+  try {
+    const response = await fetch(url, { cache: 'no-store' })
+
+    if (!response.ok) {
+      console.log('Failed to fetch tasks', response.status)
+      throw new Error('Failed to fetch tasks')
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error('Error fetching tasks:', error)
+    throw new Error('Error fetching tasks')
+  }
+}
+
+// Dynamic metadata for SEO
+export const metadata: Metadata = {
+  title: 'Task Manager - View All Tasks',
+  description: 'Manage your tasks efficiently with AI-powered suggestions.',
+  keywords: ['task manager', 'productivity', 'AI tasks'],
+}
+
+// Server component for task list
+export default async function Home() {
+  let tasks: Task[] = []
+  let error: string | null = null
+
+  try {
+    tasks = await fetchTasks()
+  } catch (err) {
+    error = err instanceof Error ? err.message : 'Unknown error'
+  }
+
   return (
-    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-sans sm:p-20">
-      <main className="row-start-2 flex flex-col items-center gap-[32px] sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-center font-mono text-sm/6 sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{' '}
-            <code className="rounded bg-black/[.05] px-1 py-0.5 font-mono font-semibold dark:bg-white/[.06]">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <a
-            className="bg-foreground text-background flex h-10 items-center justify-center gap-2 rounded-full border border-solid border-transparent px-4 text-sm font-medium transition-colors hover:bg-[#383838] sm:h-12 sm:w-auto sm:px-5 sm:text-base dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="flex h-10 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm font-medium transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:h-12 sm:w-auto sm:px-5 sm:text-base md:w-[158px] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex flex-wrap items-center justify-center gap-[24px]">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <main className="container mx-auto p-4">
+      <h1 className="mb-4 text-2xl font-bold">Task Manager</h1>
+      <Suspense fallback={<p>Loading tasks...</p>}>
+        <RefreshButton />
+        {error ? (
+          <p className="text-red-500">Error: {error}</p>
+        ) : tasks.length === 0 ? (
+          <p>No tasks available</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {tasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        )}
+      </Suspense>
+    </main>
   )
 }
+
+/**
+ * @description Next.js server component for rendering the task list page with SEO metadata.
+ * @reference https://nextjs.org/docs/app/building-your-application/rendering/server-components
+ * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ * @reference https://ui.shadcn.com/docs/components/button
+ * @linting ESLint with Airbnb TypeScript rules ensures code consistency.
+ */
