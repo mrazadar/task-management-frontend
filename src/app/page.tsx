@@ -1,29 +1,5 @@
 import { Metadata } from 'next'
-import { Task } from '@/types/task'
-import { Button } from '@/components/ui/button'
-import { Suspense } from 'react'
-
-import { TaskCard } from '@/components/TaskCard'
-import { RefreshButton } from '@/components/RefreshButton'
-
-async function fetchTasks(): Promise<Task[]> {
-  const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/tasks`
-  console.log('Fetching tasks from', url) // Debugging i)
-  try {
-    const response = await fetch(url, { cache: 'no-store' })
-
-    if (!response.ok) {
-      console.log('Failed to fetch tasks', response.status)
-      throw new Error('Failed to fetch tasks')
-    }
-
-    return response.json()
-  } catch (error) {
-    console.error('Error fetching tasks:', error)
-    throw new Error('Error fetching tasks')
-  }
-}
-
+import Link from 'next/link'
 // Dynamic metadata for SEO
 export const metadata: Metadata = {
   title: 'Task Manager - View All Tasks',
@@ -33,32 +9,23 @@ export const metadata: Metadata = {
 
 // Server component for task list
 export default async function Home() {
-  let tasks: Task[] = []
-  let error: string | null = null
-
-  try {
-    tasks = await fetchTasks()
-  } catch (err) {
-    error = err instanceof Error ? err.message : 'Unknown error'
-  }
-
   return (
     <main className="container mx-auto p-4">
       <h1 className="mb-4 text-2xl font-bold">Task Manager</h1>
-      <Suspense fallback={<p>Loading tasks...</p>}>
-        <RefreshButton />
-        {error ? (
-          <p className="text-red-500">Error: {error}</p>
-        ) : tasks.length === 0 ? (
-          <p>No tasks available</p>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
-          </div>
-        )}
-      </Suspense>
+      <div className="flex gap-4">
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/tasks/new"
+        >
+          Create a new task
+        </Link>
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/tasks"
+        >
+          View all tasks
+        </Link>
+      </div>
     </main>
   )
 }
