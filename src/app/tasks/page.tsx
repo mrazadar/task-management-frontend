@@ -8,19 +8,12 @@ import { RefreshButton } from '@/components/RefreshButton'
 import Link from 'next/link'
 
 async function fetchTasks(): Promise<Task[]> {
-  const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/tasks`
-  console.log('Fetching tasks from', url) // Debugging i)
   try {
-    const response = await fetch(url, { cache: 'no-store' })
-
-    if (!response.ok) {
-      console.log('Failed to fetch tasks', response.status)
-      throw new Error('Failed to fetch tasks')
-    }
-
-    return response.json()
+    const tasks = await fetch('http://localhost:3000/api/tasks')
+    console.log('Tasks', tasks)
+    return tasks.json()
   } catch (error) {
-    console.error('Error fetching tasks:', error)
+    console.error('Error fetching tasks', error)
     throw new Error('Error fetching tasks')
   }
 }
@@ -33,7 +26,7 @@ export const metadata: Metadata = {
 }
 
 // Server component for task list
-export default async function Home() {
+export default async function Tasks() {
   let tasks: Task[] = []
   let error: string | null = null
 

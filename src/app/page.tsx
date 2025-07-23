@@ -25,6 +25,18 @@ export default async function Home() {
         >
           View all tasks
         </Link>
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/auth/signup"
+        >
+          SignUp
+        </Link>
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/auth/signin"
+        >
+          Signin
+        </Link>
       </div>
     </main>
   )
