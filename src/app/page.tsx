@@ -27,13 +27,13 @@ export default async function Home() {
         </Link>
         <Link
           className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
-          href="/auth/signup"
+          href="/auth/register"
         >
           SignUp
         </Link>
         <Link
           className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
-          href="/auth/signin"
+          href="/auth/login"
         >
           Signin
         </Link>
