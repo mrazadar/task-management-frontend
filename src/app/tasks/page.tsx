@@ -37,7 +37,9 @@ export default async function Home() {
   try {
     const resp: ApiResponse = await fetchTasks()
     if (resp.success) {
-      initialTasks = resp.data as Task[]
+      initialTasks = Array.isArray(resp.data) ? resp.data : []
+    } else {
+      error = resp.message || 'Failed to load tasks'
     }
   } catch (err) {
     error = err instanceof Error ? err.message : 'Unknown error'

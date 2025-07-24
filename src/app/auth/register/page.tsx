@@ -10,22 +10,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { z } from 'zod'
+
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import useSWRMutation from 'swr/mutation'
 import axios from 'axios'
 
-const SignUpSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-})
+import { SignUpSchema, type SignUp } from '@/types/auth'
 
-async function signupFetcher(
-  url: string,
-  { arg }: { arg: z.infer<typeof SignUpSchema> },
-) {
+async function signupFetcher(url: string, { arg }: { arg: SignUp }) {
   return axios.post(url, arg, { withCredentials: true }).then((res) => res.data)
 }
 
@@ -37,12 +31,12 @@ export default function SignUpPage() {
     signupFetcher,
   )
 
-  const form = useForm<z.infer<typeof SignUpSchema>>({
+  const form = useForm<SignUp>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: { email: '', password: '' },
   })
 
-  const onSubmit = async (data: z.infer<typeof SignUpSchema>) => {
+  const onSubmit = async (data: SignUp) => {
     try {
       await trigger(data)
       router.push('/auth/login')

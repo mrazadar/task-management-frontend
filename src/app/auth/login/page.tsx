@@ -17,15 +17,9 @@ import { useRouter } from 'next/navigation'
 import useSWRMutation from 'swr/mutation'
 import axios from 'axios'
 
-const LoginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-})
+import { LoginSchema, type Login } from '@/types/auth'
 
-async function loginFetcher(
-  url: string,
-  { arg }: { arg: z.infer<typeof LoginSchema> },
-) {
+async function loginFetcher(url: string, { arg }: { arg: Login }) {
   return axios.post(url, arg, { withCredentials: true }).then((res) => res.data)
 }
 
@@ -37,12 +31,12 @@ export default function LoginPage() {
     loginFetcher,
   )
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
+  const form = useForm<Login>({
     resolver: zodResolver(LoginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: 'test@example.com', password: '123456789' },
   })
 
-  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (data: Login) => {
     try {
       await trigger(data)
       router.push('/')
