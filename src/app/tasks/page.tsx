@@ -12,7 +12,7 @@ async function fetchTasks(): Promise<ApiResponse> {
   const token = cookieStore.get('token')?.value
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/tasks`,
+    `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/tasks?page=1&limit=100`,
     {
       cache: 'no-store', // SSR
       headers: token ? { Cookie: `token=${token}` } : {},
