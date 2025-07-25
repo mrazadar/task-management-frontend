@@ -1,59 +1,88 @@
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { Task } from '@/types/task'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import TaskCard from '@/components/TaskCard'
+import { notFound } from 'next/navigation'
+import { ApiResponse } from '@/types'
 
-async function fetchTask(id: string): Promise<Task> {
+// Fetch single task server-side
+async function fetchTask(id: string): Promise<ApiResponse<Task>> {
+  const cookieStore = await cookies() // Await async cookies
+  const token = cookieStore.get('token')?.value
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/tasks/${id}`,
     {
-      cache: 'no-store',
+      cache: 'no-store', // SSR
+      headers: token ? { Cookie: `token=${token}` } : {},
     },
   )
+
   if (!response.ok) {
-    throw new Error('Task not found')
+    if (response.status === 404) {
+      throw new Error('Task not found')
+    }
+    throw new Error('Failed to fetch task')
   }
   return response.json()
 }
 
-interface TaskPageProps {
-  params: { id: string }
-}
-
 export async function generateMetadata({
   params,
-}: TaskPageProps): Promise<Metadata> {
-  const task = await fetchTask(params.id)
-  return {
-    title: `Task: ${task.title}`,
-    description: task.description || 'View details of your task.',
+}: {
+  params: { id: string }
+}): Promise<Metadata> {
+  try {
+    const { id: task_id } = await params
+    const resp = await fetchTask(task_id)
+    let task: Task | null = null
+    if (resp.success) {
+      task = resp.data as Task
+    }
+    return {
+      title: `Task Manager - ${task?.title}`,
+      description: `View details for task: ${task?.title}`,
+    }
+  } catch {
+    return {
+      title: 'Task Manager - Task Not Found',
+      description: 'Task details not available',
+    }
   }
 }
 
-export default async function TaskPage({ params }: TaskPageProps) {
-  const task = await fetchTask(params.id)
+export default async function TaskPage({ params }: { params: { id: string } }) {
+  let task: Task | null = null
+  let error: string | null = null
+
+  try {
+    const { id: task_id } = await params
+    const resp = await fetchTask(task_id)
+    if (resp.success) {
+      task = resp.data as Task
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Task not found') {
+      notFound()
+    }
+    error = err instanceof Error ? err.message : 'Unknown error'
+  }
 
   return (
     <main className="container mx-auto p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>{task.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600">
-            {task.description || 'No description'}
-          </p>
-          <p className="text-sm font-semibold">Status: {task.status}</p>
-          <p className="text-xs text-gray-500">
-            Created: {new Date(task.createdAt).toLocaleDateString()}
-          </p>
-        </CardContent>
-      </Card>
+      <h1 className="mb-4 text-2xl font-bold">Task Details</h1>
+      {error ? (
+        <p className="text-red-500">Error: {error}</p>
+      ) : (
+        task && <TaskCard task={task} />
+      )}
     </main>
   )
 }
 
 /**
- * @description Server component for rendering a single task page with dynamic SEO metadata.
+ * @description Server component for rendering a single task with async cookie-based auth.
  * @reference https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes
- * @reference https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+ * @reference https://nextjs.org/docs/app/api-reference/functions/cookies
+ * @linting ESLint with Airbnb TypeScript rules ensures code consistency.
  */

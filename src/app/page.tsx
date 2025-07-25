@@ -15,6 +15,12 @@ export default async function Home() {
       <div className="flex gap-4">
         <Link
           className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/dashboard"
+        >
+          Dashboard
+        </Link>
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
           href="/tasks/new"
         >
           Create a new task
@@ -24,6 +30,18 @@ export default async function Home() {
           href="/tasks"
         >
           View all tasks
+        </Link>
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/auth/register"
+        >
+          SignUp
+        </Link>
+        <Link
+          className="mb-4 text-blue-600 visited:text-purple-600 hover:underline"
+          href="/auth/login"
+        >
+          Signin
         </Link>
       </div>
     </main>
