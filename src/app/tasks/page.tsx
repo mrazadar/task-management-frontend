@@ -45,6 +45,41 @@ export default async function Home() {
     error = err instanceof Error ? err.message : 'Unknown error'
   }
 
+  //   useEffect(() => {
+  //   const eventSource = new EventSource('/api/tasks/stream');
+  //   eventSource.onmessage = (event) => {
+  //     const data = JSON.parse(event.data);
+  //     if (data.event === 'heartbeat') return;
+
+  //     const message = (() => {
+  //       switch (data.event) {
+  //         case 'taskCreated':
+  //           return `New task "${data.task.title}" created`;
+  //         case 'taskUpdated':
+  //           return `Task "${data.task.title}" updated to ${data.task.status}`;
+  //         case 'taskDeleted':
+  //           return `Task deleted`;
+  //         default:
+  //           return 'Task updated';
+  //       }
+  //     })();
+
+  //     toast({
+  //       title: 'Task Update',
+  //       description: message,
+  //       duration: 3000,
+  //     });
+  //     handleFetchTasks(page); // Refresh tasks
+  //   };
+
+  //   eventSource.onerror = () => {
+  //     setError('Error receiving real-time updates');
+  //     eventSource.close();
+  //   };
+
+  //   return () => eventSource.close();
+  // }, [page]);
+
   return (
     <main className="container mx-auto p-4">
       <h1 className="mb-4 text-2xl font-bold">Task Manager</h1>
