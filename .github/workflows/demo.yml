@@ -16,3 +16,10 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: echo "🍏 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+#install node modules
+      - name: Install Node.js dependencies
+        run: npm install
+# lint code
+      - name: Lint code
+        run: npm run lint
